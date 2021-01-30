@@ -11,6 +11,7 @@ import org.elasticsearch.action.admin.indices.refresh.RefreshRequest;
 import org.elasticsearch.action.admin.indices.refresh.RefreshResponse;
 import org.elasticsearch.action.index.IndexRequest;
 import org.elasticsearch.action.index.IndexResponse;
+import org.elasticsearch.action.support.WriteRequest;
 import org.elasticsearch.action.support.replication.ReplicationResponse;
 import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestClient;
@@ -114,12 +115,6 @@ public class Application {
 
 
     public static long updateByQuery(RestHighLevelClient client ,String index, String type, String id, QueryBuilder queryBuilder, Map<String, Object> scriptMap, String idOrCode) {
-        RefreshRequest request = new RefreshRequest(index);
-        try {
-            RefreshResponse refreshResponse = client.indices().refresh(request, RequestOptions.DEFAULT);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
         //执行的索引,相当于update table
         UpdateByQueryRequest updateRequest = new UpdateByQueryRequest(index);
         //执行脚本,相当于update set
@@ -128,6 +123,7 @@ public class Application {
         //更新条件,相当于where
         updateRequest.setQuery(queryBuilder);
         updateRequest.setConflicts("proceed");
+        updateRequest.setRefresh(true);
         try {
             //修改操作
             BulkByScrollResponse bulkResponse = client.updateByQuery(updateRequest, RequestOptions.DEFAULT);
